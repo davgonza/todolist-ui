@@ -17,13 +17,16 @@ import moment from "moment";
 import DateEditor from "./DateEditor";
 import linq from "linq";
 
+const What = ({ value }) => {
+    return value == null ? null : moment(value).format("L");
+};
 
 
 const const_columns = [
     { key: "id", name: "ID", sortable: true, editable: true },
     { key: "title", name: "Title", sortable: true, editable: true },
     { key: "done", name: "Done", sortable: true, editable: true },
-    { key: "finish_by_date", name: "Finish by", sortable: true, editable: true, editor: DateEditor }
+    { key: "finish_by_date", name: "Finish by", sortable: true, editable: true, editor: DateEditor, formatter: What }
 ];
 
 
@@ -51,8 +54,29 @@ class App extends React.Component {
 
     // default State object
     state = {
-        rows: []
+        rows: [],
+        refresh: false
     };
+
+    getSize() {
+        let count = this.state.rows.length;
+
+        if (this.state.refresh) {
+            count++; // hack for update data-grid
+            this.setState({
+                refresh: false
+            });
+        }
+
+        return count;
+    }
+
+    refresh() {
+        this.setState({
+            refresh: true
+        });
+    }
+
 
     componentDidMount() {
         axios
@@ -179,24 +203,31 @@ class App extends React.Component {
 
 
 
-    myCallback = (row) => {
+    myEditCallback = (row) => {
         console.log(row);
         
-        var rowIds = Array.from(this.state.rows, p => p.id);
-        let isNew = rowIds.indexOf(row.id) < 0;
-
-        if (isNew) {
-            const newTodo = {
+        if (row.isNew) {
+            const t = {
                 title: row.title,
-                done: row.done,
-                finish_by_date: row.finish_by_date
+                todo: {
+                    title: row.title
+                }
             };
 
-            axios.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', { newTodo })
+            try {
+            axios.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', 
+                { 
+                    title: row.title,
+                    done: row.done,
+                    finish_by_date: row.finish_by_date
+                 })
                 .then(res => {
                     console.log(res);
                     console.log(res.data);
                 })
+            } catch (e) {
+                console.log(`:( Axios request failed: ${e}`)
+            }
         }
         else {
             const todo = {                
@@ -214,28 +245,31 @@ class App extends React.Component {
             
             todo.id = row.id;
             const rows = this.state.rows;
-            const index = rows.indexOf(todo);
-            rows[index] = todo;
+            const index = rows.indexOf(row);
+
+            rows[index] = row;
+            rows[index].canSave = false;
 
             this.setState({ rows });
+            this.refresh();
         }
     };
 
-    getCellActions = (column, row, state) => {
+    getEditRowAction = (column, row, state) => {
         const cellActions = {
             finish_by_date: [
                 {
-                    icon: <span className="glyphicon glyphicon-remove" />,
+                    icon: <span className="glyphicon glyphicon-pencil" />,
                     callback: () => {
 
 
-                        this.myCallback(row);
+                        this.myEditCallback(row);
                     }
                 }
             ]
         };
-        return row.canSave ? cellActions[column.key] : null;
 
+        return row.canSave ? cellActions[column.key] : null;
     }
 
 
@@ -251,7 +285,7 @@ class App extends React.Component {
             columns={this.state.columns}
             rowGetter={i => this.state.rows[i]}
             ref={grid => (this.grid = grid)}
-            rowsCount={20}
+            rowsCount={this.getSize()}
             onGridSort={this.onGridSort}
             onGridRowsUpdated={this.onGridRowsUpdated}
             enableCellSelect={true}
@@ -268,7 +302,7 @@ class App extends React.Component {
                     }
             }}
             minHeight={500} 
-            getCellActions= {(column, row) => this.getCellActions(column, row)}
+            getCellActions= {(column, row) => this.getEditRowAction(column, row)}
             />
 
             <Button onClick={this.addNewRow} variant='contained' style={{float: 'right', margin: 20}}>Add</Button>
