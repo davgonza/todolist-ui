@@ -8,6 +8,8 @@
   pointer-events: none;
 }
 
+@import url("//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css");
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
