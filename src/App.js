@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import ReactDataGrid from 'react-data-grid';
 import update from 'immutability-helper';
 import Typography from '@material-ui/core/Typography'
-import { Button } from '@material-ui/core'
+import { Button, ListItemText } from '@material-ui/core'
 
 
 
@@ -15,6 +15,7 @@ import axios from "axios";
 
 import moment from "moment";
 import DateEditor from "./DateEditor";
+import linq from "linq";
 
 
 
@@ -32,30 +33,6 @@ const const_rows = [
     { id: 2, title: "example 3", done: 60 }
 ];
 
-function getCellActions(column, row) {
-    const cellActions = {
-        finish_by_date: [
-            {
-                icon: <span className="glyphicon glyphicon-remove" />,
-                callback: () => {
-                    const newTodo = {
-                        title: row.title,
-                        done: row.done,
-                        finish_by_date: row.finish_by_date
-                    };
-
-                    axios.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', { newTodo })
-                        .then(res => {
-                            console.log(res);
-                            console.log(res.data);
-                        })
-                }
-            }
-        ]
-    };
-    return row.hasChanged ? cellActions[column.key] : null;
-}
-
 
 
 
@@ -68,6 +45,8 @@ class App extends React.Component {
             rows: [],
             selectedIndexes: []
         }
+
+        this.addNewRow = this.addNewRow.bind(this);
     }
 
     // default State object
@@ -75,9 +54,6 @@ class App extends React.Component {
         rows: []
     };
 
-    //https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com
-
-    //https://jsonplaceholder.typicode.com/users
     componentDidMount() {
         axios
             .get("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos")
@@ -98,45 +74,20 @@ class App extends React.Component {
                 const newState = Object.assign({}, this.state, {
                     rows: newRows
                 });
-                this.state.origRows = newRows
-                this.state.rows = newRows
+
+                var comparer = this.returnComparer('ASC', 'id')
+                this.state.rows = newRows.sort(comparer);
 
                 // store the new state object in the component's state
                 this.setState(newState);
             })
             .catch(error => console.log(error));
+        
+        this.grid.handleSort('id', 'DESC');
     }
-
-
-    handleSubmit = event => {
-        let s = this.state.origRows
-
-        const newTodo = {
-            title: "",
-            done: false,
-            finish_by_date: new Date()
-        };
-
-        axios.post('https://jsonplaceholder.typicode.com/users', { newTodo })
-            .then(res => {
-                console.log(res);
-                console.log(res.data);
-            })
-    }
-
-
-
-
-
 
     onGridSort = (columnName, sortDirection) => {
-        var comparer = function(a, b) {
-            if(sortDirection === 'ASC'){
-                return (a[columnName] > b[columnName]) ? 1 : -1;
-            }else if(sortDirection === 'DESC'){
-                return (a[columnName] < b[columnName]) ? 1 : -1;
-            }
-        }
+        var comparer = this.returnComparer(sortDirection, columnName)
         this.state.rows.sort(comparer);
 
         this.setState({
@@ -151,7 +102,7 @@ class App extends React.Component {
         for (let i = fromRow; i <= toRow; i++) {
             let rowToUpdate = rows[i];
             rows[i] = update(rowToUpdate, {$merge: updated});
-            rows[i].hasChanged = true;
+            rows[i].canSave = true;
         }
 
         this.setState({rows});
@@ -175,15 +126,19 @@ class App extends React.Component {
     }
 
     addNewRow = () => {
-        var addNewRows = this.state.rows
-        // same structure
+        let addNewRows = this.state.rows.slice()
+
         addNewRows.push({
+            id: 11,
             title: "",
-            done: false,
-            finish_by_date: new Date()
-        })
-        this.setState(this.state.rows)
+            done: false
+        });
+
+        addNewRows[this.state.rows.length].canSave = true;
+        addNewRows[this.state.rows.length].isNew = true;
+        this.setState({rows: addNewRows});
         this.setState(this.state.selectedIndexes)
+
         console.log('added new row')
     }
 
@@ -206,6 +161,17 @@ class App extends React.Component {
         })
     }
 
+    returnComparer(sortDirection, columnName) {
+        return function (a, b) {
+            if (sortDirection === 'ASC') {
+                return (a[columnName] > b[columnName]) ? 1 : -1;
+            }
+            else if (sortDirection === 'DESC') {
+                return (a[columnName] < b[columnName]) ? 1 : -1;
+            }
+        };
+    }
+
     keyPress(event) {
         console.log("pressed")
         console.log(event)
@@ -213,7 +179,64 @@ class App extends React.Component {
 
 
 
+    myCallback = (row) => {
+        console.log(row);
+        
+        var rowIds = Array.from(this.state.rows, p => p.id);
+        let isNew = rowIds.indexOf(row.id) < 0;
 
+        if (isNew) {
+            const newTodo = {
+                title: row.title,
+                done: row.done,
+                finish_by_date: row.finish_by_date
+            };
+
+            axios.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', { newTodo })
+                .then(res => {
+                    console.log(res);
+                    console.log(res.data);
+                })
+        }
+        else {
+            const todo = {                
+                title: row.title,
+                done: row.done,
+                finish_by_date: row.finish_by_date
+            };
+
+            let url = 'https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos/' + row.id;
+            axios.put(url, todo)
+                .then(res => {
+                    console.log(res);
+                    console.log(res.data);
+                })
+            
+            todo.id = row.id;
+            const rows = this.state.rows;
+            const index = rows.indexOf(todo);
+            rows[index] = todo;
+
+            this.setState({ rows });
+        }
+    };
+
+    getCellActions = (column, row, state) => {
+        const cellActions = {
+            finish_by_date: [
+                {
+                    icon: <span className="glyphicon glyphicon-remove" />,
+                    callback: () => {
+
+
+                        this.myCallback(row);
+                    }
+                }
+            ]
+        };
+        return row.canSave ? cellActions[column.key] : null;
+
+    }
 
 
 
@@ -227,6 +250,7 @@ class App extends React.Component {
             <ReactDataGrid
             columns={this.state.columns}
             rowGetter={i => this.state.rows[i]}
+            ref={grid => (this.grid = grid)}
             rowsCount={20}
             onGridSort={this.onGridSort}
             onGridRowsUpdated={this.onGridRowsUpdated}
@@ -236,7 +260,7 @@ class App extends React.Component {
                     maxWidth: 50,
                     resizable: true,
                     showCheckbox: true,
-                    enableShiftSelect: true,
+                    enableShiftSelect: false,
                     onRowsSelected: this.onRowsSelected,
                     onRowsDeselected: this.onRowsDeselected,
                     selectBy: {
@@ -244,12 +268,11 @@ class App extends React.Component {
                     }
             }}
             minHeight={500} 
-            getCellActions={getCellActions}
+            getCellActions= {(column, row) => this.getCellActions(column, row)}
             />
 
             <Button onClick={this.addNewRow} variant='contained' style={{float: 'right', margin: 20}}>Add</Button>
             <Button onClick={this.deleteRow} variant='outlined' color='secondary' style={{ margin: 20 }}>Delete Rows</Button>
-            <Button onClick={()=> this.handleSubmit()} variant='outlined' color='primary' style={{ margin: 20 }}>Save all changes</Button>
             </div>
 
         );
