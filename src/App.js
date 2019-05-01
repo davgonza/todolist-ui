@@ -23,7 +23,7 @@ const dateDisplay = ({ value }) => {
 
 const const_columns = [
     { key: "title", name: "Title", sortable: true, editable: true },
-    { key: "done", name: "Done", sortable: true, editable: true },
+    { key: "priority", name: "Priority", sortable: true, editable: true },
     { key: "finish_by_date", name: "Finish by", sortable: true, editable: true, editor: DateEditor, formatter: dateDisplay }
 ];
 
@@ -37,13 +37,11 @@ class RowRenderer extends React.Component {
   };
 
   getRowStyle = () => {
+    let isDone = this.props.row.done === true;
     return {
-      color: this.getRowBackground()
+      color: isDone ? 'gray' : 'black',
+      fontStyle: isDone ? 'italic' : 'normal'
     };
-  };
-
-  getRowBackground = () => {
-    return this.props.row.done == true ? 'gray' : 'blue';
   };
 
   render() {
@@ -179,7 +177,7 @@ class App extends React.Component {
 
         const selectedIndexes = this.state.selectedIndexes
 
-        if (selectedIndexes.length != 1) {
+        if (selectedIndexes.length !== 1) {
             return;
         }
 
@@ -212,7 +210,7 @@ class App extends React.Component {
 
         const selectedIndexes = this.state.selectedIndexes
 
-        if (selectedIndexes.length != 1) {
+        if (selectedIndexes.length !== 1) {
             return;
         }
 
