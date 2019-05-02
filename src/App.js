@@ -6,6 +6,7 @@ import update from 'immutability-helper';
 import Typography from '@material-ui/core/Typography'
 import { Button, ListItemText } from '@material-ui/core'
 
+import { Editors } from "react-data-grid-addons";
 import logo from './logo.svg';
 import './App.css';
 import axios from "axios";
@@ -15,6 +16,15 @@ import DateEditor from "./DateEditor";
 
 import PropTypes from 'prop-types';
 
+const { DropDownEditor } = Editors;
+const priorityTypes = [
+  { id: "false", value: "Not urgent" },
+  { id: "null", value: "Normal" },
+  { id: "true", value: "Urgent" }
+];
+
+const PriorityEditor = <DropDownEditor options={priorityTypes} />;
+
 const { Row } = ReactDataGrid;
 const dateDisplay = ({ value }) => {
     return value == null ? null : moment(value).format("L");
@@ -23,7 +33,7 @@ const dateDisplay = ({ value }) => {
 
 const const_columns = [
     { key: "title", name: "Title", sortable: true, editable: true },
-    { key: "priority", name: "Priority", sortable: true, editable: true },
+    { key: "priority", name: "Priority", sortable: true, editable: true, editor: PriorityEditor },
     { key: "finish_by_date", name: "Finish by", sortable: true, editable: true, editor: DateEditor, formatter: dateDisplay }
 ];
 
@@ -36,17 +46,19 @@ class RowRenderer extends React.Component {
     this.row.setScrollLeft(scrollBy);
   };
 
-  getRowStyle = () => {
+  getStyle = () => {
     let isDone = this.props.row.done === true;
     return {
       color: isDone ? 'gray' : 'black',
-      fontStyle: isDone ? 'italic' : 'normal'
+      fontStyle: isDone ? 'italic' : 'normal',
+      fontFamily: isDone ? 'cursive' : 'inherit',
+      fontWeight: isDone ? 'bold' : 'inherit'
     };
   };
 
   render() {
     // usually though it will just be a matter of wrapping a div, and then calling back through to the grid
-    return (<div style={this.getRowStyle()}><Row ref={ node => this.row = node } {...this.props}/></div>);
+    return (<div style={this.getStyle()}><Row ref={ node => this.row = node } {...this.props}/></div>);
   }
 }
 
@@ -73,11 +85,13 @@ class App extends React.Component {
         axios
             .get("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos")
             .then(response => {
-
                 const newRows = response.data.map(c => {
+                    var priority = c.priority === null ? "Normal" : c.priority === false ? "Not urgent" : true;
+
                     return {
                         id: c.id,
                         title: c.title,
+                        priority: priority,
                         done: c.done,
                         finish_by_date: c.finish_by_date
                     };
@@ -121,9 +135,7 @@ class App extends React.Component {
 
     onRowsSelected = rows => {
         this.setState({
-            selectedIndexes: this.state.selectedIndexes.concat(
-                rows.map(r => r.rowIdx)
-            )
+            selectedIndexes: rows.map(r => r.rowIdx)
         })
     }
 
@@ -161,6 +173,7 @@ class App extends React.Component {
         addNewRows.push({
             id: 11,
             title: "",
+            priority: "Normal",
             done: false
         });
 
@@ -253,6 +266,7 @@ class App extends React.Component {
         console.log(row);
         
         var finishDate = new Date(row.finish_by_date);
+        var priority = row.priority === "Normal" ? null : row.priority === "Not urgent" ? false : true;
             
         if (row.isNew) {
             try {
@@ -260,6 +274,7 @@ class App extends React.Component {
                     { 
                         title: row.title,
                         done: row.done,
+                        priority: priority,
                         finish_by_date: finishDate
                     })
                     .then(res => {
@@ -274,6 +289,7 @@ class App extends React.Component {
             const todo = {                
                 title: row.title,
                 done: row.done,
+                priority: priority,
                 finish_by_date: finishDate
             };
 
