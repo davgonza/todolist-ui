@@ -1,6 +1,9 @@
 import React from 'react';
 import { render } from "react-dom";
 import ReactDOM from 'react-dom';
+
+import {Route, Switch, BrowserRouter,Redirect} from 'react-router-dom'
+
 import ReactDataGrid from 'react-data-grid';
 import update from 'immutability-helper';
 import Typography from '@material-ui/core/Typography'
@@ -15,6 +18,10 @@ import moment from "moment";
 import DateEditor from "./DateEditor";
 
 import PropTypes from 'prop-types';
+
+import {connect} from 'react-redux';
+import Signup from "./components/Signup";
+import Login from "./components/Login";
 
 const { DropDownEditor } = Editors;
 const priorityTypes = [
@@ -70,7 +77,8 @@ class App extends React.Component {
         this.state = {
             columns: const_columns,
             rows: [],
-            selectedIndexes: []
+            selectedIndexes: [],
+            user: {}
         }
 
         this.addNewRow = this.addNewRow.bind(this);
@@ -83,7 +91,7 @@ class App extends React.Component {
 
     componentDidMount() {
         axios
-            .get("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos")
+            .get("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos",{headers: { "Authorization": `Bearer ${localStorage.getItem('token')}`  }})
             .then(response => {
                 const newRows = response.data.map(c => {
                     var priority = c.priority === null ? "Normal" : c.priority === false ? "Not urgent" : true;
@@ -110,6 +118,46 @@ class App extends React.Component {
         // set column arrow to sort
         this.grid.handleSort('finish_by_date', 'ASC');
     }
+
+    signupSubmitHandler = userInfo => {
+        fetch("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/signup", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json",
+                accepts: "application/json"
+            },
+            body: JSON.stringify({ name: userInfo.name, password: userInfo.password, password_confirmation: userInfo.password_confirmation, email: userInfo.email })
+        })
+            .then(resp => resp.json())
+            .then(data => {
+                localStorage.setItem("token", data.jwt);
+                this.setState({ user: data.user }, () => console.log(this.state));
+            });
+
+        let thing = this.state.user;
+    };
+
+    loginSubmitHandler = userInfo => {
+        fetch("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ email: userInfo.name, password: userInfo.password }),
+            headers: {
+                "content-type": "application/json",
+                accepts: "application/json"
+            }
+        })
+            .then(resp => resp.json())
+            .then(user => {
+                if (user.message) {
+                    return <Redirect to="/login" />;
+                } else {
+                    localStorage.setItem("token", user.jwt);
+                    this.setState({ user: user.user }, () => console.log("User is logged in from loginSubmitHandler!", user));
+                }
+            });
+        
+        let loggedIn = this.state.user;
+    };
 
     onGridSort = (columnName, sortDirection) => {
         var comparer = this.returnComparer(sortDirection, columnName)
@@ -362,11 +410,26 @@ class App extends React.Component {
             <Button onClick={this.addNewRow} variant='contained' style={{float: 'right', margin: 20}}>Add</Button>
             <Button onClick={this.deleteRow} variant='outlined' color='secondary' style={{ margin: 20 }}>Delete</Button>
             <Button onClick={this.markAsDone} variant='outlined' color='secondary' style={{ margin: 40 }}>Done</Button>
+
+
+            <BrowserRouter>
+            <Switch>
+                <Route
+                path="/signup"
+                render={  () => <Signup submitHandler={this.signupSubmitHandler} />  }/>
+                <Route
+                path="/login"
+                render={() => <Login submitHandler={this.loginSubmitHandler} name="Login"/>} />
+            </Switch>
+            </BrowserRouter>
+
+
             </div>
 
         );
     }
 }
+
 
 export default App;
 //render(<Example />, document.querySelector("#root"));
