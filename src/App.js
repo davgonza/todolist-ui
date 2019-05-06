@@ -130,7 +130,7 @@ class App extends React.Component {
         })
             .then(resp => resp.json())
             .then(data => {
-                localStorage.setItem("token", data.jwt);
+                localStorage.setItem("token", data.auth_token);
                 this.setState({ user: data.user }, () => console.log(this.state));
             });
 
@@ -151,8 +151,8 @@ class App extends React.Component {
                 if (user.message) {
                     return <Redirect to="/login" />;
                 } else {
-                    localStorage.setItem("token", user.jwt);
-                    this.setState({ user: user.user }, () => console.log("User is logged in from loginSubmitHandler!", user));
+                    localStorage.setItem("token", user.auth_token);
+                    this.setState({ user: user }, () => console.log("User is logged in from loginSubmitHandler!", user));
                 }
             });
         
@@ -318,13 +318,17 @@ class App extends React.Component {
             
         if (row.isNew) {
             try {
+                var headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                }
                 axios.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', 
                     { 
                         title: row.title,
                         done: row.done,
                         priority: priority,
                         finish_by_date: finishDate
-                    })
+                    }, {headers: headers})
                     .then(res => {
                         console.log(res);
                         console.log(res.data);
