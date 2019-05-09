@@ -113,10 +113,8 @@ class App extends React.Component {
                 this.setState(newState);
             })
             .catch(error => console.log(error));
-
         // set column arrow to sort
         this.grid.handleSort('finish_by_date', 'ASC');
-        return <Redirect to="/login" />;
     }
 
     signupSubmitHandler = userInfo => {
@@ -175,7 +173,7 @@ class App extends React.Component {
             .then(resp => resp.json())
             .then(user => {
                 if (user.message) {
-                    return <Redirect to="/login" />;
+                    return <Redirect to="/" />;
                 } else {
                     localStorage.setItem("token", user.auth_token);
                     localStorage.setItem("username", userInfo.email);
@@ -449,13 +447,13 @@ class App extends React.Component {
 
             {(localStorage.getItem('username') !== '' && localStorage.getItem('username') !== null)
                   ? <button onClick={this.logOut}>Log Out</button>
-                  : <BrowserRouter>
+                  : <BrowserRouter >
                     <Switch>
                     <Route
-                    path="/signup"
+                    path={process.env.PUBLIC_URL + '/signup'}
                     render={  () => <Signup submitHandler={this.signupSubmitHandler} />  }/>
                     <Route
-                    path="/login"
+                    path={process.env.PUBLIC_URL + '/'}
                     render={() => <Login submitHandler={this.loginSubmitHandler} email="Login"/>} />
                     </Switch>
                     </BrowserRouter>

@@ -32,6 +32,7 @@ class Signup extends React.Component {
           <input
             type="text"
             placeholder="email"
+            required
             name="email"
             value={this.state.email}
             onChange={this.changeHandler}
@@ -39,6 +40,7 @@ class Signup extends React.Component {
           <input
             type="password"
             placeholder="password"
+            required
             name="password"
             value={this.state.password}
             onChange={this.changeHandler}
@@ -46,6 +48,7 @@ class Signup extends React.Component {
           <input
             type="password"
             placeholder="confirm password"
+            required
             name="password_confirmation"
             value={this.state.password_confirmation}
             onChange={this.changeHandler}
@@ -54,7 +57,7 @@ class Signup extends React.Component {
           <br/>
           {email === "Login"
             ? <span className="uk-link-muted"><Link to="/signup">I Don't Have An Account</Link></span>
-            : <span className="uk-link-muted"><Link to="/login">I Have An Account Already</Link></span>
+            : <span className="uk-link-muted"><Link to={process.env.PUBLIC_URL + '/'}>I Have An Account Already</Link></span>
           }
         </form>
       </div>

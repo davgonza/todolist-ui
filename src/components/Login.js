@@ -27,6 +27,7 @@ class Login extends React.Component {
             type="text"
             placeholder="Email"
             name="email"
+            required
             value={this.state.email}
             onChange={this.changeHandler}
           />
@@ -35,6 +36,7 @@ class Login extends React.Component {
             type="password"
             placeholder="Password"
             name="password"
+            required
             value={this.state.password}
             onChange={this.changeHandler}
           />
