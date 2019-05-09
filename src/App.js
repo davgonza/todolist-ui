@@ -16,6 +16,7 @@ import axios from "axios";
 
 import moment from "moment";
 import DateEditor from "./DateEditor";
+import AxiosClient from "./AxiosClient";
 
 import PropTypes from 'prop-types';
 
@@ -90,8 +91,8 @@ class App extends React.Component {
     };
 
     componentDidMount() {
-        axios
-            .get("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos",{headers: { "Authorization": `Bearer ${localStorage.getItem('token')}`  }})
+        AxiosClient
+            .get("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos")
             .then(response => {
                 const newRows = response.data.map(c => {
                     var priority = c.priority === null ? "Normal" : c.priority === false ? "Not urgent" : true;
@@ -117,18 +118,16 @@ class App extends React.Component {
 
         // set column arrow to sort
         this.grid.handleSort('finish_by_date', 'ASC');
-
-        let something = this.state.user;
     }
 
     signupSubmitHandler = userInfo => {
         fetch("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/signup", {
             method: "POST",
+            body: JSON.stringify({ password: userInfo.password, password_confirmation: userInfo.password_confirmation, email: userInfo.email }),
             headers: {
                 "content-type": "application/json",
                 accepts: "application/json"
-            },
-            body: JSON.stringify({ password: userInfo.password, password_confirmation: userInfo.password_confirmation, email: userInfo.email })
+            }
         })
             .then(resp => resp.json())
             .then(data => {
@@ -144,17 +143,13 @@ class App extends React.Component {
                     var priority = newRow.priority === "Normal" ? null : newRow.priority === "Not urgent" ? false : true;
                     var finishDate = new Date(newRow.finish_by_date);
 
-                    var headers = {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${localStorage.getItem('token')}`
-                    }
-                    axios.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', 
+                    AxiosClient.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', 
                         { 
                             title: newRow.title,
                             done: newRow.done,
                             priority: priority,
                             finish_by_date: finishDate
-                        }, {headers: headers})
+                        })
                         .then(res => {
                             console.log(res);
                             console.log(res.data);
@@ -279,7 +274,7 @@ class App extends React.Component {
 
         let rowId = this.state.rows[selectedIndexes[0]].id
 
-        axios.delete(`https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos/${rowId}`)
+        AxiosClient.delete(`https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos/${rowId}`)
             .then(res => {
                 console.log(res);
                 console.log(res.data);
@@ -320,7 +315,7 @@ class App extends React.Component {
         const todo = { done: true };
 
         let url = 'https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos/' + row.id;
-        axios.put(url, todo)
+        AxiosClient.put(url, todo)
             .then(res => {
                 console.log(res);
                 console.log(res.data);
@@ -351,17 +346,13 @@ class App extends React.Component {
             
         if (row.isNew) {
             try {
-                var headers = {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`
-                }
-                axios.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', 
+                AxiosClient.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', 
                     { 
                         title: row.title,
                         done: row.done,
                         priority: priority,
                         finish_by_date: finishDate
-                    }, {headers: headers})
+                    })
                     .then(res => {
                         console.log(res);
                         console.log(res.data);
@@ -379,7 +370,7 @@ class App extends React.Component {
             };
 
             let url = 'https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos/' + row.id;
-            axios.put(url, todo)
+            AxiosClient.put(url, todo)
                 .then(res => {
                     console.log(res);
                     console.log(res.data);
