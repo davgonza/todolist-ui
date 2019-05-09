@@ -7,12 +7,10 @@ import {Route, Switch, BrowserRouter,Redirect} from 'react-router-dom'
 import ReactDataGrid from 'react-data-grid';
 import update from 'immutability-helper';
 import Typography from '@material-ui/core/Typography'
-import { Button, ListItemText } from '@material-ui/core'
+import { Button } from '@material-ui/core'
 
 import { Editors } from "react-data-grid-addons";
-import logo from './logo.svg';
 import './App.css';
-import axios from "axios";
 
 import moment from "moment";
 import DateEditor from "./DateEditor";
@@ -118,6 +116,7 @@ class App extends React.Component {
 
         // set column arrow to sort
         this.grid.handleSort('finish_by_date', 'ASC');
+        return <Redirect to="/login" />;
     }
 
     signupSubmitHandler = userInfo => {
@@ -290,6 +289,7 @@ class App extends React.Component {
                 return true
             }
         })
+
         this.setState({ selectedIndexes: filteredSelectedIndexes });
         this.setState({ rows: filteredRows });
     }
@@ -410,8 +410,6 @@ class App extends React.Component {
         window.location.reload();
     }
 
-
-
     render() {
         return (
             <div onKeyPress={event => this.keyPress(event)}>
@@ -471,4 +469,3 @@ class App extends React.Component {
 
 
 export default App;
-//render(<Example />, document.querySelector("#root"));
