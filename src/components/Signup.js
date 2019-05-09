@@ -56,7 +56,7 @@ class Signup extends React.Component {
           <button>Sign Up</button>
           <br/>
           {email === "Login"
-            ? <span className="uk-link-muted"><Link to="/signup">I Don't Have An Account</Link></span>
+            ? <span className="uk-link-muted"><Link to={process.env.PUBLIC_URL + '/signup'}>I Don't Have An Account</Link></span>
             : <span className="uk-link-muted"><Link to={process.env.PUBLIC_URL + '/'}>I Have An Account Already</Link></span>
           }
         </form>
