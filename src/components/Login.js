@@ -46,8 +46,8 @@ class Login extends React.Component {
           Login</button>
           <br/>
           {email === "Login"
-            ? <span className="uk-link-muted"><Link to={process.env.PUBLIC_URL + '/signup'}>I Don't Have An Account</Link></span>
-            : <span className="uk-link-muted"><Link to={process.env.PUBLIC_URL + '/'}>I Have An Account Already</Link></span>
+            ? <span className="uk-link-muted"><Link to={`${process.env.PUBLIC_URL}/signup`}>I Don't Have An Account</Link></span>
+            : <span className="uk-link-muted"><Link to={`${process.env.PUBLIC_URL}/`}>I Have An Account Already</Link></span>
           }
         </form>
       </div>

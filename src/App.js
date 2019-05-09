@@ -452,9 +452,10 @@ class App extends React.Component {
                     <Route
                     path={process.env.PUBLIC_URL + '/signup'}
                     render={  () => <Signup submitHandler={this.signupSubmitHandler} />  }/>
+
                     <Route
                     path={process.env.PUBLIC_URL + '/'}
-                    render={() => <Login submitHandler={this.loginSubmitHandler} email="Login"/>} />
+                    render={() => <Login submitHandler={this.loginSubmitHandler} email="Login"/> }/>
                     </Switch>
                     </BrowserRouter>
             }
