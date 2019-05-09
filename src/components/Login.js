@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom';
 
 class Login extends React.Component {
   state = {
-    name: "",
+    email: "",
     password: ""
   };
 
@@ -18,17 +18,16 @@ class Login extends React.Component {
     this.props.submitHandler(this.state);
   };
   render() {
-    const {name} = this.props
+    const {email} = this.props
     return (
       <div id="right-col" className="uk-tile-muted uk-padding-large uk-height-viewport login-box">
         <form onSubmit={this.submitHandler}>
-          <legend className="uk-legend">Please {name}</legend>
           <input
             className="uk-input"
             type="text"
             placeholder="Email"
-            name="name"
-            value={this.state.name}
+            name="email"
+            value={this.state.email}
             onChange={this.changeHandler}
           />
           <input
@@ -42,9 +41,9 @@ class Login extends React.Component {
           <button
           className="uk-button"
           >
-          {name}</button>
+          Login</button>
           <br/>
-          {name === "Login"
+          {email === "Login"
             ? <span className="uk-link-muted"><Link to="/signup">I Don't Have An Account</Link></span>
             : <span className="uk-link-muted"><Link to="/login">I Have An Account Already</Link></span>
           }

@@ -128,7 +128,7 @@ class App extends React.Component {
                 "content-type": "application/json",
                 accepts: "application/json"
             },
-            body: JSON.stringify({ name: userInfo.name, password: userInfo.password, password_confirmation: userInfo.password_confirmation, email: userInfo.email })
+            body: JSON.stringify({ password: userInfo.password, password_confirmation: userInfo.password_confirmation, email: userInfo.email })
         })
             .then(resp => resp.json())
             .then(data => {
@@ -172,7 +172,7 @@ class App extends React.Component {
     loginSubmitHandler = userInfo => {
         fetch("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/auth/login", {
             method: "POST",
-            body: JSON.stringify({ email: userInfo.name, password: userInfo.password }),
+            body: JSON.stringify({ email: userInfo.email, password: userInfo.password }),
             headers: {
                 "content-type": "application/json",
                 accepts: "application/json"
@@ -184,7 +184,7 @@ class App extends React.Component {
                     return <Redirect to="/login" />;
                 } else {
                     localStorage.setItem("token", user.auth_token);
-                    localStorage.setItem("username", userInfo.name);
+                    localStorage.setItem("username", userInfo.email);
                     this.setState({ user: user }, () => console.log("User is logged in from loginSubmitHandler!", user));
                 }
 
@@ -467,11 +467,10 @@ class App extends React.Component {
                     render={  () => <Signup submitHandler={this.signupSubmitHandler} />  }/>
                     <Route
                     path="/login"
-                    render={() => <Login submitHandler={this.loginSubmitHandler} name="Login"/>} />
+                    render={() => <Login submitHandler={this.loginSubmitHandler} email="Login"/>} />
                     </Switch>
                     </BrowserRouter>
             }
-
 
             </div>
 
