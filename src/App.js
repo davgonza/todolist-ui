@@ -117,6 +117,8 @@ class App extends React.Component {
 
         // set column arrow to sort
         this.grid.handleSort('finish_by_date', 'ASC');
+
+        let something = this.state.user;
     }
 
     signupSubmitHandler = userInfo => {
@@ -131,10 +133,40 @@ class App extends React.Component {
             .then(resp => resp.json())
             .then(data => {
                 localStorage.setItem("token", data.auth_token);
+                localStorage.setItem("username", userInfo.email);
                 this.setState({ user: data.user }, () => console.log(this.state));
-            });
 
-        let thing = this.state.user;
+                let splicedRows = this.state.rows.slice();
+
+                for (let i = 0; i < splicedRows.length; i++) {
+                    let newRow = splicedRows[i];
+
+                    var priority = newRow.priority === "Normal" ? null : newRow.priority === "Not urgent" ? false : true;
+                    var finishDate = new Date(newRow.finish_by_date);
+
+                    var headers = {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem('token')}`
+                    }
+                    axios.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', 
+                        { 
+                            title: newRow.title,
+                            done: newRow.done,
+                            priority: priority,
+                            finish_by_date: finishDate
+                        }, {headers: headers})
+                        .then(res => {
+                            console.log(res);
+                            console.log(res.data);
+                        })
+
+                    splicedRows[i].canSave = false;
+                    splicedRows[i].isNew = false;
+                }
+
+                this.setState({ rows: splicedRows });
+                this.refresh();
+            });
     };
 
     loginSubmitHandler = userInfo => {
@@ -152,11 +184,13 @@ class App extends React.Component {
                     return <Redirect to="/login" />;
                 } else {
                     localStorage.setItem("token", user.auth_token);
+                    localStorage.setItem("username", userInfo.name);
                     this.setState({ user: user }, () => console.log("User is logged in from loginSubmitHandler!", user));
                 }
+
+                // refresh the view somehow
+                window.location.reload();
             });
-        
-        let loggedIn = this.state.user;
     };
 
     onGridSort = (columnName, sortDirection) => {
@@ -217,11 +251,12 @@ class App extends React.Component {
 
     addNewRow = () => {
         let addNewRows = this.state.rows.slice()
+        var defaultDate = moment().add(1,'d').toDate(); 
 
         addNewRows.push({
-            id: 11,
             title: "",
             priority: "Normal",
+            finish_by_date: defaultDate,
             done: false
         });
 
@@ -252,9 +287,7 @@ class App extends React.Component {
             
         let filteredSelectedIndexes = []
 
-        // delete one item at once
         const filteredRows = this.state.rows.filter(function(element, index) {
-            // user indexOf method to find
             if(selectedIndexes.indexOf(index) >= 0) {
                 filteredSelectedIndexes = selectedIndexes.filter(i => i !== index);
                 return false
@@ -377,14 +410,24 @@ class App extends React.Component {
         return row.canSave ? cellActions[column.key] : null;
     }
 
+    logOut = event => {
+        event.preventDefault()
+        localStorage.removeItem("token")
+        // Remove the user object from the Redux store
+        localStorage.removeItem("username")
+                
+        window.location.reload();
+    }
+
 
 
     render() {
         return (
             <div onKeyPress={event => this.keyPress(event)}>
-            <Typography variant='display1'>
-            To-Do List
-            </Typography>
+              {(localStorage.getItem('username') !== '' && localStorage.getItem('username') !== null)
+                ? <Typography variant='display1'> {localStorage.getItem('username')}'s To-Do List </Typography>
+                : <Typography variant='display1'> To-Do List </Typography>
+              }
 
             <ReactDataGrid
             columns={this.state.columns}
@@ -415,17 +458,19 @@ class App extends React.Component {
             <Button onClick={this.deleteRow} variant='outlined' color='secondary' style={{ margin: 20 }}>Delete</Button>
             <Button onClick={this.markAsDone} variant='outlined' color='secondary' style={{ margin: 40 }}>Done</Button>
 
-
-            <BrowserRouter>
-            <Switch>
-                <Route
-                path="/signup"
-                render={  () => <Signup submitHandler={this.signupSubmitHandler} />  }/>
-                <Route
-                path="/login"
-                render={() => <Login submitHandler={this.loginSubmitHandler} name="Login"/>} />
-            </Switch>
-            </BrowserRouter>
+            {(localStorage.getItem('username') !== '' && localStorage.getItem('username') !== null)
+                  ? <button onClick={this.logOut}>Log Out</button>
+                  : <BrowserRouter>
+                    <Switch>
+                    <Route
+                    path="/signup"
+                    render={  () => <Signup submitHandler={this.signupSubmitHandler} />  }/>
+                    <Route
+                    path="/login"
+                    render={() => <Login submitHandler={this.loginSubmitHandler} name="Login"/>} />
+                    </Switch>
+                    </BrowserRouter>
+            }
 
 
             </div>
