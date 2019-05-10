@@ -89,30 +89,34 @@ class App extends React.Component {
     };
 
     componentDidMount() {
-        AxiosClient
-            .get("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos")
-            .then(response => {
-                const newRows = response.data.map(c => {
-                    var priority = c.priority === null ? "Normal" : c.priority === false ? "Not urgent" : true;
+        let retrieveTodos = (localStorage.getItem('username') !== '' && localStorage.getItem('username') !== null);
 
-                    return {
-                        id: c.id,
-                        title: c.title,
-                        priority: priority,
-                        done: c.done,
-                        finish_by_date: c.finish_by_date
-                    };
-                });
+        if (retrieveTodos) {
+            AxiosClient
+                .get("https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos")
+                .then(response => {
+                    const newRows = response.data.map(c => {
+                        var priority = c.priority === null ? "Normal" : c.priority === false ? "Not urgent" : true;
 
-                var comparer = this.returnComparer('ASC', 'finish_by_date')
+                        return {
+                            id: c.id,
+                            title: c.title,
+                            priority: priority,
+                            done: c.done,
+                            finish_by_date: c.finish_by_date
+                        };
+                    });
 
-                const newState = Object.assign({}, this.state, {
-                    rows: newRows.sort(comparer)
-                });
+                    var comparer = this.returnComparer('ASC', 'finish_by_date')
 
-                this.setState(newState);
-            })
-            .catch(error => console.log(error));
+                    const newState = Object.assign({}, this.state, {
+                        rows: newRows.sort(comparer)
+                    });
+
+                    this.setState(newState);
+                })
+                .catch(error => console.log(error));
+        }
         // set column arrow to sort
         this.grid.handleSort('finish_by_date', 'ASC');
     }
@@ -276,7 +280,7 @@ class App extends React.Component {
                 console.log(res);
                 console.log(res.data);
             })
-            
+
         let filteredSelectedIndexes = []
 
         const filteredRows = this.state.rows.filter(function(element, index) {
@@ -307,7 +311,7 @@ class App extends React.Component {
         let rows = this.state.rows.slice()
 
         rows[selectedIndexes[0]] = row
-            
+
         this.setState({rows});
 
         const todo = { done: true };
@@ -338,10 +342,10 @@ class App extends React.Component {
 
     myEditCallback = (row) => {
         console.log(row);
-        
+
         var finishDate = new Date(row.finish_by_date);
         var priority = row.priority === "Normal" ? null : row.priority === "Not urgent" ? false : true;
-            
+
         if (row.isNew) {
             try {
                 AxiosClient.post('https://cors-anywhere.herokuapp.com/https://minimal-todo-server.herokuapp.com/todos', 
@@ -360,7 +364,7 @@ class App extends React.Component {
             }
         }
         else {
-            const todo = {                
+            const todo = {
                 title: row.title,
                 done: row.done,
                 priority: priority,
@@ -404,7 +408,7 @@ class App extends React.Component {
         localStorage.removeItem("token")
         // Remove the user object from the Redux store
         localStorage.removeItem("username")
-                
+
         window.location.reload();
     }
 
@@ -437,7 +441,7 @@ class App extends React.Component {
                         indexes: this.state.selectedIndexes
                     }
             }}
-            minHeight={500} 
+            minHeight={500}
             getCellActions= {(column, row) => this.getEditRowAction(column, row)}
             />
 
