@@ -2,7 +2,7 @@
   "name": "tl-datagrid-react",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://davgonza.github.io/todolist-ui",
+  "homepage": "https://davgonza.github.io/todolist-ui/login",
   "dependencies": {
     "@material-ui/core": "^3.5.1",
     "axios": "^0.18.0",
