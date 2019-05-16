@@ -2,7 +2,8 @@ import React from 'react';
 import { render } from "react-dom";
 import ReactDOM from 'react-dom';
 
-import {Route, Switch, BrowserRouter,Redirect} from 'react-router-dom'
+import {Router,Route, Switch, BrowserRouter,Redirect} from 'react-router-dom'
+import history from './history';
 
 import ReactDataGrid from 'react-data-grid';
 import update from 'immutability-helper';
@@ -119,6 +120,8 @@ class App extends React.Component {
         }
         // set column arrow to sort
         this.grid.handleSort('finish_by_date', 'ASC');
+
+        history.push('/login');
     }
 
     signupSubmitHandler = userInfo => {
@@ -451,17 +454,19 @@ class App extends React.Component {
 
             {(localStorage.getItem('username') !== '' && localStorage.getItem('username') !== null)
                   ? <button onClick={this.logOut}>Log Out</button>
-                  : <BrowserRouter >
-                    <Switch>
-                    <Route
-                    path={process.env.PUBLIC_URL + '/signup'}
-                    render={  () => <Signup submitHandler={this.signupSubmitHandler} />  }/>
+                  : <Router history={history}>
+                        <Switch>
+                            <Route
+                                path={process.env.PUBLIC_URL + '/signup'}
+                                component={Signup}
+                                render={  () => <Signup submitHandler={this.signupSubmitHandler} />  }/>
 
-                    <Route
-                    path={process.env.PUBLIC_URL + '/login'}
-                    render={() => <Login submitHandler={this.loginSubmitHandler} email="Login"/> }/>
-                    </Switch>
-                    </BrowserRouter>
+                            <Route
+                                path={process.env.PUBLIC_URL + '/login'}
+                                component={Login}
+                                render={() => <Login submitHandler={this.loginSubmitHandler} email="Login"/> }/>
+                        </Switch>
+                    </Router>
             }
 
             </div>
