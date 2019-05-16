@@ -1,11 +1,11 @@
 self.__precacheManifest = [
   {
-    "revision": "e1c100ec36146a6c2103",
+    "revision": "9fb5d402bb2bb1a600ab",
     "url": "/todolist-ui/static/css/main.75abeea5.chunk.css"
   },
   {
-    "revision": "e1c100ec36146a6c2103",
-    "url": "/todolist-ui/static/js/main.a0fc7829.chunk.js"
+    "revision": "9fb5d402bb2bb1a600ab",
+    "url": "/todolist-ui/static/js/main.66ad7d0c.chunk.js"
   },
   {
     "revision": "a5eb0bddfa708fa71713",
@@ -84,7 +84,7 @@ self.__precacheManifest = [
     "url": "/todolist-ui/static/media/brand-icons.a1a749e8.svg"
   },
   {
-    "revision": "d8cc9ce122dade0436dd9e72c810e187",
+    "revision": "c16dbdb35c9976959d0abc501e82e746",
     "url": "/todolist-ui/index.html"
   }
 ];
