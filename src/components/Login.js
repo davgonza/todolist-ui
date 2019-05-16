@@ -44,7 +44,7 @@ class Login extends React.Component {
           >
           Login</button>
           <br/>
-          {((window.location.pathname).startsWith('/login'))
+          {((window.location.pathname).endsWith('/login'))
             ? <span className="uk-link-muted"><Link to={`${process.env.PUBLIC_URL}/signup`}>I Don't Have An Account</Link></span>
             : <span className="uk-link-muted"><Link to={`${process.env.PUBLIC_URL}/login`}>I Have An Account Already</Link></span>
           }
