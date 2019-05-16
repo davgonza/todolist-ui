@@ -18,7 +18,6 @@ class Login extends React.Component {
     this.props.submitHandler(this.state);
   };
   render() {
-    const {email} = this.props
     return (
       <div id="right-col" className="uk-tile-muted uk-padding-large uk-height-viewport login-box">
         <form onSubmit={this.submitHandler}>
@@ -45,7 +44,7 @@ class Login extends React.Component {
           >
           Login</button>
           <br/>
-          {email === "Login"
+          {((window.location.pathname).startsWith('/login'))
             ? <span className="uk-link-muted"><Link to={`${process.env.PUBLIC_URL}/signup`}>I Don't Have An Account</Link></span>
             : <span className="uk-link-muted"><Link to={`${process.env.PUBLIC_URL}/login`}>I Have An Account Already</Link></span>
           }

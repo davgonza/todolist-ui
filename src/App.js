@@ -82,6 +82,8 @@ class App extends React.Component {
         }
 
         this.addNewRow = this.addNewRow.bind(this);
+
+        history.push(`${process.env.PUBLIC_URL}/login`);
     }
 
     state = {
@@ -120,8 +122,6 @@ class App extends React.Component {
         }
         // set column arrow to sort
         this.grid.handleSort('finish_by_date', 'ASC');
-
-        history.push(`${process.env.PUBLIC_URL}/login`);
     }
 
     signupSubmitHandler = userInfo => {
@@ -458,13 +458,11 @@ class App extends React.Component {
                         <Switch>
                             <Route
                                 path={process.env.PUBLIC_URL + '/signup'}
-                                component={Signup}
                                 render={  () => <Signup submitHandler={this.signupSubmitHandler} />  }/>
 
                             <Route
                                 path={process.env.PUBLIC_URL + '/login'}
-                                component={Login}
-                                render={() => <Login submitHandler={this.loginSubmitHandler} email="Login"/> }/>
+                                render={() => <Login submitHandler={this.loginSubmitHandler} /> }/>
                         </Switch>
                     </Router>
             }
