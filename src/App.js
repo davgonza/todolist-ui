@@ -121,7 +121,7 @@ class App extends React.Component {
         // set column arrow to sort
         this.grid.handleSort('finish_by_date', 'ASC');
 
-        history.push('/login');
+        history.push(`${process.env.PUBLIC_URL}/login`);
     }
 
     signupSubmitHandler = userInfo => {
